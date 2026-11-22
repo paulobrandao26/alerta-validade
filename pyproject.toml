@@ -1,0 +1,23 @@
+[project]
+name = "validade-certa"
+version = "0.1.0"
+description = "Alerta de produtos perto de vencer para mercados pequenos, com leitura da data por foto (IA)."
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unitarios", "tests/integracao"]
+pythonpath = ["."]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning:passlib.*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["app/db/migrations/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "SIM"]
+ignore = ["B008"]  # Depends(...) nos parâmetros é o padrão do FastAPI
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "E501", "B017"]

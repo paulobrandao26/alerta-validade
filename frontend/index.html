@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Validade Certa</title>
+  <meta name="description" content="Avisa o dono do mercado sobre os produtos perto de vencer. Tire uma foto da data e a IA lê para você.">
+  <meta name="theme-color" content="#15211c">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icones/icone.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icones/icone-192.png">
+  <link rel="stylesheet" href="/css/app.css">
+  <script type="module" src="/js/app.js"></script>
+</head>
+<body>
+  <a class="pular" href="#tela">Pular para o conteúdo</a>
+
+  <header class="topo" id="topo" hidden>
+    <span class="marca" aria-hidden="true">
+      <svg viewBox="0 0 32 32" width="28" height="28"><path d="M4 9.5 13.5 2H28v14.5L18.5 26H4z" fill="#ffd60a"/><circle cx="23" cy="7" r="2" fill="#15211c"/><path d="m8 16 4 4 7-7" fill="none" stroke="#15211c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="topo__nome" id="nome-loja"></span>
+  </header>
+
+  <main id="tela" tabindex="-1">
+    <p class="carregando">Carregando…</p>
+  </main>
+
+  <nav class="abas" id="abas" aria-label="Menu principal" hidden>
+    <a href="#/painel" data-aba="/painel">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+      Validades
+    </a>
+    <a href="#/adicionar" data-aba="/adicionar" class="abas__principal">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+      Adicionar
+    </a>
+    <a href="#/ajustes" data-aba="/ajustes">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
+      Ajustes
+    </a>
+  </nav>
+
+  <div class="aviso" id="aviso" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Segredos (o .env.example é o modelo que vai para o GitHub)
+.env
+
+# Banco local e fotos enviadas
+dados/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Avaliação da IA: fotos reais de embalagens ficam só no computador
+tests/avaliacao_ia/fotos/
+tests/avaliacao_ia/resultado*.csv
+
+# Sistema e editores
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

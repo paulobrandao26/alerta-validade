@@ -1,0 +1,829 @@
+/* Validade Certa: etiqueta de prateleira de mercado.
+   Amarelo = vender primeiro, vermelho = retirar, verde = em dia. Cor nunca aparece sozinha: sempre com texto. */
+
+:root {
+  --fundo: #eef1ec;
+  --papel: #ffffff;
+  --tinta: #15211c;
+  --tinta-suave: #4b5b53;
+  --linha: #d3dbd2;
+  --amarelo: #ffd60a;
+  --vencido: #b3261e;
+  --vencido-fundo: #fdeae7;
+  --atencao-fundo: #fff4c2;
+  --ok: #1d6b43;
+  --ok-fundo: #e1f1e7;
+  --zap: #128c4f;
+  --raio: 14px;
+  --raio-pequeno: 10px;
+  --sombra: 0 1px 0 rgba(21, 33, 28, 0.08), 0 6px 18px -10px rgba(21, 33, 28, 0.25);
+  --fonte: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --altura-abas: 68px;
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--tinta);
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  overflow-x: clip;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--tinta);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.pular {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 50;
+  background: var(--tinta);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: var(--raio-pequeno);
+}
+
+.pular:focus {
+  top: 12px;
+}
+
+/* ---------- Estrutura ---------- */
+
+.topo {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 18px 12px;
+  background: var(--tinta);
+  color: #fff;
+}
+
+.marca {
+  display: inline-flex;
+}
+
+.topo__nome {
+  font-weight: 700;
+  font-size: 1.05rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px 16px calc(var(--altura-abas) + env(safe-area-inset-bottom, 0px) + 28px);
+  outline: none;
+}
+
+.abas {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 8px 10px calc(env(safe-area-inset-bottom, 0px) + 8px);
+  background: var(--papel);
+  border-top: 1px solid var(--linha);
+}
+
+.abas a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 52px;
+  border-radius: var(--raio-pequeno);
+  color: var(--tinta-suave);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.abas svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.abas a[aria-current="page"] {
+  color: var(--tinta);
+  background: var(--fundo);
+}
+
+.abas a.abas__principal {
+  background: var(--amarelo);
+  color: var(--tinta);
+}
+
+.abas a.abas__principal[aria-current="page"] {
+  box-shadow: inset 0 0 0 2px var(--tinta);
+}
+
+.tela__titulo {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+}
+
+.secao__titulo {
+  font-size: 1rem;
+  color: var(--tinta-suave);
+  font-weight: 600;
+  margin: 28px 0 10px;
+}
+
+.carregando {
+  color: var(--tinta-suave);
+  padding: 24px 0;
+}
+
+/* ---------- Botões ---------- */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: var(--raio-pequeno);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.08s ease, background-color 0.15s ease;
+}
+
+.botao:active {
+  transform: translateY(1px);
+}
+
+.botao:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.botao--principal {
+  background: var(--tinta);
+  color: #fff;
+}
+
+.botao--principal:hover {
+  background: #23362e;
+}
+
+.botao--claro {
+  background: var(--papel);
+  color: var(--tinta);
+  box-shadow: inset 0 0 0 1.5px var(--linha);
+}
+
+.botao--claro:hover {
+  box-shadow: inset 0 0 0 1.5px var(--tinta-suave);
+}
+
+.botao--escuro {
+  background: var(--tinta);
+  color: #fff;
+}
+
+.botao--zap {
+  background: var(--zap);
+  color: #fff;
+}
+
+.botao--perigo {
+  background: var(--papel);
+  color: var(--vencido);
+  box-shadow: inset 0 0 0 1.5px #ecc3bd;
+}
+
+.botao--perigo-cheio {
+  background: var(--vencido);
+  color: #fff;
+}
+
+.botao--pequeno {
+  min-height: 44px;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+}
+
+.botao--largo {
+  width: 100%;
+}
+
+.botao-texto {
+  display: inline-block;
+  min-height: 44px;
+  padding: 10px 2px;
+  border: 0;
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* ---------- Avisos ---------- */
+
+.alerta {
+  padding: 12px 14px;
+  border-radius: var(--raio-pequeno);
+  font-size: 0.98rem;
+}
+
+.alerta--erro {
+  background: var(--vencido-fundo);
+  color: #7d1a14;
+}
+
+.alerta--ok {
+  background: var(--ok-fundo);
+  color: #124a2e;
+}
+
+.alerta--atencao {
+  background: var(--atencao-fundo);
+  color: #5b4300;
+}
+
+.alerta--info {
+  background: var(--papel);
+  color: var(--tinta-suave);
+  margin-top: 16px;
+  box-shadow: inset 0 0 0 1px var(--linha);
+}
+
+.aviso {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--altura-abas) + env(safe-area-inset-bottom, 0px) + 16px);
+  z-index: 20;
+  width: min(92vw, 460px);
+  transform: translateX(-50%);
+  padding: 12px 16px;
+  border-radius: var(--raio-pequeno);
+  background: var(--tinta);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--sombra);
+}
+
+.aviso[data-tipo="erro"] {
+  background: var(--vencido);
+}
+
+/* ---------- Formulários ---------- */
+
+.cartao {
+  background: var(--papel);
+  border-radius: var(--raio);
+  padding: 20px;
+  box-shadow: var(--sombra);
+}
+
+.cartao--sutil {
+  margin-top: 20px;
+  box-shadow: inset 0 0 0 1px var(--linha);
+  display: grid;
+  gap: 10px;
+}
+
+.cartao--sutil .secao__titulo {
+  margin: 0;
+}
+
+.formulario {
+  display: grid;
+  gap: 16px;
+}
+
+.campo {
+  display: grid;
+  gap: 6px;
+}
+
+.campo label {
+  font-weight: 650;
+}
+
+.campo input {
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--linha);
+  border-radius: var(--raio-pequeno);
+  background: #fbfcfa;
+  color: var(--tinta);
+  font: inherit;
+  font-size: 1.0625rem; /* 17px: o iPhone não dá zoom ao tocar */
+}
+
+.campo input:focus {
+  border-color: var(--tinta);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(21, 33, 28, 0.15);
+}
+
+.campo input[aria-invalid="true"] {
+  border-color: var(--vencido);
+}
+
+.campo__ajuda {
+  color: var(--tinta-suave);
+  font-size: 0.92rem;
+}
+
+.campo__erro {
+  color: var(--vencido);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.campo--marcar {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+}
+
+.campo--marcar input {
+  width: 24px;
+  height: 24px;
+  min-height: 0;
+  accent-color: var(--tinta);
+}
+
+.campo--marcar label {
+  font-weight: 500;
+}
+
+.formulario__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.formulario__acoes .botao--principal {
+  flex: 1 1 180px;
+}
+
+.formulario__foto {
+  width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  background: #0d1411;
+  border-radius: var(--raio-pequeno);
+}
+
+/* ---------- Entrar ---------- */
+
+.entrada {
+  display: grid;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.entrada__apresentacao {
+  background: var(--tinta);
+  color: #fff;
+  border-radius: var(--raio);
+  padding: 24px 22px 26px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* a "etiqueta" amarela pendurada no canto */
+.entrada__apresentacao::after {
+  content: "";
+  position: absolute;
+  right: -18px;
+  top: -10px;
+  width: 110px;
+  height: 84px;
+  background: var(--amarelo);
+  clip-path: polygon(30% 0, 100% 0, 100% 100%, 0 100%, 0 38%);
+  transform: rotate(8deg);
+}
+
+.entrada__marca {
+  font-weight: 800;
+  color: var(--amarelo);
+  margin-bottom: 18px;
+}
+
+.entrada__frase {
+  font-size: clamp(1.7rem, 7vw, 2.3rem);
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  max-width: 15ch;
+}
+
+.entrada__detalhe {
+  margin-top: 12px;
+  color: #c9d5ce;
+  max-width: 32ch;
+}
+
+.entrada h1 {
+  font-size: 1.35rem;
+  margin-top: 6px;
+}
+
+/* ---------- Painel ---------- */
+
+.resumo {
+  display: grid;
+  gap: 16px;
+}
+
+.resumo__frase {
+  font-size: clamp(1.5rem, 6vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+.contagem {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.contagem__item {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  border-radius: var(--raio-pequeno);
+  font-size: 0.85rem;
+  line-height: 1.25;
+}
+
+.contagem__item strong {
+  font-size: 1.6rem;
+  line-height: 1.1;
+}
+
+.contagem__item--vencido {
+  background: var(--vencido-fundo);
+  color: #7d1a14;
+}
+
+.contagem__item--atencao {
+  background: var(--atencao-fundo);
+  color: #5b4300;
+}
+
+.contagem__item--ok {
+  background: var(--ok-fundo);
+  color: #124a2e;
+}
+
+.resumo__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.resumo__acoes .botao {
+  flex: 1 1 200px;
+}
+
+.lotes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.lote {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  grid-template-areas: "prazo info" "acoes acoes";
+  gap: 12px 14px;
+  padding: 12px;
+  background: var(--papel);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+/* a etiqueta de prateleira com os dias */
+.lote__prazo {
+  grid-area: prazo;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 72px;
+  border-radius: var(--raio-pequeno);
+  text-align: center;
+  line-height: 1.05;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.lote__prazo strong {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.lote__prazo span {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.lote--vencido .lote__prazo {
+  background: var(--vencido);
+  color: #fff;
+}
+
+.lote--vencido .lote__prazo strong {
+  font-size: 1.05rem;
+}
+
+.lote--atencao .lote__prazo {
+  background: var(--amarelo);
+  color: var(--tinta);
+}
+
+.lote--ok .lote__prazo {
+  background: var(--ok-fundo);
+  color: #124a2e;
+}
+
+.lote__info {
+  grid-area: info;
+  align-self: center;
+  min-width: 0;
+}
+
+.lote__nome {
+  font-weight: 700;
+  font-size: 1.08rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.lote__meta {
+  color: var(--tinta-suave);
+  font-size: 0.92rem;
+  margin-top: 4px;
+}
+
+.etiqueta-estado {
+  font-weight: 700;
+}
+
+.lote--vencido .etiqueta-estado {
+  color: var(--vencido);
+}
+
+.lote--atencao .etiqueta-estado {
+  color: #7a5a00;
+}
+
+.lote--ok .etiqueta-estado {
+  color: var(--ok);
+}
+
+.lote__acoes {
+  grid-area: acoes;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.lote__acoes .botao {
+  flex: 1 1 120px;
+}
+
+.lote__pergunta {
+  flex-basis: 100%;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.lote--ok .lote__acoes .botao {
+  min-height: 44px;
+}
+
+.vazio {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+  margin-top: 20px;
+  padding: 22px;
+  border-radius: var(--raio);
+  border: 2px dashed var(--linha);
+}
+
+/* ---------- Adicionar ---------- */
+
+.escolha {
+  display: grid;
+  gap: 12px;
+}
+
+.escolha__foto {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  padding: 26px 22px;
+  border-radius: var(--raio);
+  background: var(--amarelo);
+  color: var(--tinta);
+  cursor: pointer;
+  box-shadow: var(--sombra);
+  transition: transform 0.08s ease;
+}
+
+.escolha__foto:active {
+  transform: translateY(1px);
+}
+
+.escolha__foto:focus-within,
+#entrada-foto:focus-visible + .escolha__foto {
+  outline: 3px solid var(--tinta);
+  outline-offset: 2px;
+}
+
+.escolha__foto strong {
+  font-size: 1.5rem;
+  line-height: 1.15;
+}
+
+.escolha__icone svg {
+  width: 40px;
+  height: 40px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+
+.leitura {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 16px;
+  align-items: center;
+  background: var(--papel);
+  border-radius: var(--raio);
+  padding: 14px;
+  box-shadow: var(--sombra);
+}
+
+.leitura__foto {
+  width: 112px;
+  height: 112px;
+  object-fit: cover;
+  border-radius: var(--raio-pequeno);
+  background: #0d1411;
+}
+
+.leitura__estado {
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.barra-espera {
+  height: 6px;
+  border-radius: 99px;
+  background: var(--fundo);
+  overflow: hidden;
+  position: relative;
+}
+
+.barra-espera::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  border-radius: inherit;
+  background: var(--tinta);
+  animation: espera 1.2s ease-in-out infinite;
+}
+
+@keyframes espera {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barra-espera::after {
+    animation: none;
+    width: 100%;
+    opacity: 0.35;
+  }
+  .botao,
+  .escolha__foto {
+    transition: none;
+  }
+}
+
+/* ---------- Telas maiores ---------- */
+
+@media (min-width: 700px) {
+  main {
+    padding-top: 32px;
+  }
+
+  .lote {
+    grid-template-columns: 84px 1fr auto;
+    grid-template-areas: "prazo info acoes";
+    align-items: center;
+  }
+
+  .lote__acoes {
+    flex-wrap: nowrap;
+  }
+
+  .lote__acoes .botao {
+    flex: 0 0 auto;
+  }
+
+  .lote__pergunta {
+    flex-basis: auto;
+  }
+}
+
+@media (max-width: 359px) {
+  .contagem {
+    grid-template-columns: 1fr;
+  }
+  .contagem__item {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .lote {
+    grid-template-columns: 64px 1fr;
+  }
+}
