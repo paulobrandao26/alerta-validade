@@ -1,0 +1,21 @@
+# O Supabase grátis pausa o banco depois de uma semana sem uso.
+# A cada 3 dias isto abre o site e faz uma consulta simples no banco, para ele nunca pausar.
+name: Manter o banco acordado
+
+on:
+  schedule:
+    - cron: "0 12 */3 * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  cutucar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consulta o banco pelo site
+        env:
+          URL_DO_SITE: ${{ vars.URL_DO_SITE }}
+        run: |
+          if [ -z "$URL_DO_SITE" ]; then echo "Defina a variável URL_DO_SITE no repositório."; exit 0; fi
+          curl --fail --silent --show-error --max-time 60 "$URL_DO_SITE/api/saude"

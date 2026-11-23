@@ -7,6 +7,7 @@ from fastapi import Request
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import NullPool
 
 
 def criar_engine(url: str) -> Engine:
@@ -24,6 +25,11 @@ def criar_engine(url: str) -> Engine:
             cursor.close()
 
         return engine
+    if ":6543/" in url:
+        # Pooler do Supabase em modo transação (usado em hospedagem que "dorme", como o Vercel):
+        # o próprio pooler guarda as conexões, então aqui não se mantém nenhuma aberta,
+        # e comandos preparados ficam desligados porque esse modo não os suporta.
+        return create_engine(url, poolclass=NullPool, connect_args={"prepare_threshold": None})
     return create_engine(url, pool_pre_ping=True)
 
 

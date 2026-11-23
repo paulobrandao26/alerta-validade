@@ -52,3 +52,11 @@ def test_desenvolvimento_gera_chave_aleatoria():
     a = Configuracao(_env_file=None, ambiente="desenvolvimento", secret_key="")
     b = Configuracao(_env_file=None, ambiente="desenvolvimento", secret_key="")
     assert len(a.secret_key) >= 32 and a.secret_key != b.secret_key
+
+
+def test_endereco_do_supabase_usa_o_driver_instalado():
+    from app.config import Configuracao
+
+    for url in ("postgresql://u:s@h:6543/postgres", "postgres://u:s@h:6543/postgres"):
+        config = Configuracao(_env_file=None, database_url=url)
+        assert config.database_url == "postgresql+psycopg://u:s@h:6543/postgres"

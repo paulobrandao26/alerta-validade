@@ -81,15 +81,18 @@ def processar(
     hoje: date,
     confianca_minima: float,
     max_tentativas: int,
+    imagem: bytes | None = None,
 ) -> None:
-    """Chama a IA para uma leitura já reivindicada e grava o resultado.
+    """Chama a IA para uma leitura e grava o resultado.
 
     Nenhuma falha da IA perde a foto: ou ela volta para a fila (falha passageira),
     ou vai para revisão manual, onde a pessoa digita os dados.
+    Com `imagem`, a foto vem da memória (leitura imediata) e não existe arquivo em disco.
     """
     leitura.tentativas += 1
     try:
-        imagem = caminho_seguro(pasta_uploads, leitura.arquivo).read_bytes()
+        if imagem is None:
+            imagem = caminho_seguro(pasta_uploads, leitura.arquivo).read_bytes()
         resposta = leitor.ler(imagem, leitura.mime)
     except IANaoConfigurada:
         _para_revisao(leitura, "Leitura automática desligada. Preencha os dados.")
@@ -126,7 +129,7 @@ def processar(
     sessao.commit()
     # Terminou a leitura (com ou sem sucesso): a foto não é mais necessária no servidor.
     # A pessoa confere olhando a foto que ficou no próprio celular. Sem custo de armazenamento.
-    if leitura.status != StatusLeitura.PENDENTE:
+    if leitura.status != StatusLeitura.PENDENTE and leitura.arquivo:
         apagar_foto(pasta_uploads, leitura.arquivo)
 
 

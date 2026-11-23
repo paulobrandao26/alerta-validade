@@ -153,3 +153,43 @@ def test_foto_e_apagada_mesmo_quando_vai_para_revisao(logado, leitor, config, ro
 def test_nao_existe_rota_para_baixar_fotos(logado):
     leitura = enviar(logado).json()
     assert logado.get(f"/api/leituras/{leitura['id']}/foto").status_code == 404
+
+
+# ---------- Leitura imediata (hospedagem que "dorme", como o Vercel) ----------
+
+
+def _modo_imediato(app, config, monkeypatch):
+    monkeypatch.setattr(config, "leitura_imediata", True)
+
+
+def test_leitura_imediata_ja_responde_com_o_resultado(app, logado, leitor, config, monkeypatch):
+    _modo_imediato(app, config, monkeypatch)
+    leitor.programar(RespostaIA(produto="Leite", validade=date(2026, 12, 10), confianca=0.95))
+    resposta = enviar(logado)
+    assert resposta.status_code == 202
+    corpo = resposta.json()
+    assert corpo["status"] == "lida" and corpo["validade_lida"] == "2026-12-10"
+    assert leitor.chamadas == 1
+    # Nada gravado em disco.
+    pasta = Path(config.pasta_uploads)
+    assert not pasta.exists() or not any(pasta.iterdir())
+
+    lote = logado.post(
+        f"/api/leituras/{corpo['id']}/confirmar",
+        json={"produto_nome": "Leite", "validade": "2026-12-10", "quantidade": 6},
+    )
+    assert lote.status_code == 201
+
+
+def test_leitura_imediata_com_ia_fora_do_ar_vai_direto_para_revisao(app, logado, leitor, config, monkeypatch):
+    _modo_imediato(app, config, monkeypatch)
+    leitor.programar(IAIndisponivel("timeout"))
+    corpo = enviar(logado).json()
+    assert corpo["status"] == "revisao"
+    assert leitor.chamadas == 1  # não fica tentando de novo dentro da requisição
+
+
+def test_leitura_imediata_sem_ia_configurada_vai_para_revisao(app, logado, leitor, config, monkeypatch):
+    _modo_imediato(app, config, monkeypatch)
+    leitor.programar(IANaoConfigurada())
+    assert enviar(logado).json()["status"] == "revisao"

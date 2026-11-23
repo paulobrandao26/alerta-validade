@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
 from sqlalchemy.orm import Session
+from starlette.concurrency import run_in_threadpool
 
 from app.db.sessao import obter_sessao
 from app.modules.contas.modelos import Usuario
@@ -20,14 +21,34 @@ async def enviar_foto(
     usuario: Usuario = Depends(usuario_atual),
     sessao: Session = Depends(obter_sessao),
 ):
-    """Recebe a foto e responde na hora. A IA lê depois, no worker."""
+    """Recebe a foto. Normalmente responde na hora e a IA lê depois, no worker.
+
+    Com LEITURA_IMEDIATA, a IA lê aqui mesmo e a resposta já sai com o resultado
+    (lida ou revisão). A foto fica só na memória: nada é gravado em disco.
+    """
     config = request.app.state.config
     if not request.app.state.limitador_fotos.tentar(f"u{usuario.id}"):
         raise HTTPException(status_code=429, detail="Muitas fotos em pouco tempo. Espere um minuto.")
     conteudo = await foto.read(config.upload_max_bytes + 1)
     mime = arquivos.validar_foto(conteudo, config.upload_max_bytes)
-    nome = arquivos.salvar_foto(config.pasta_uploads, conteudo, mime)
-    return servico.registrar(sessao, usuario.loja_id, usuario.id, nome, mime)
+    if not config.leitura_imediata:
+        nome = arquivos.salvar_foto(config.pasta_uploads, conteudo, mime)
+        return servico.registrar(sessao, usuario.loja_id, usuario.id, nome, mime)
+
+    leitura = servico.registrar(sessao, usuario.loja_id, usuario.id, "", mime)
+    # Sem fila para tentar de novo: se a IA falhar, vai direto para a pessoa digitar.
+    await run_in_threadpool(
+        servico.processar,
+        sessao,
+        leitura,
+        request.app.state.leitor,
+        config.pasta_uploads,
+        relogio.hoje(config.fuso_horas),
+        config.ia_confianca_minima,
+        1,
+        conteudo,
+    )
+    return leitura
 
 
 @rotas.get("/{leitura_id}", response_model=LeituraSaida)

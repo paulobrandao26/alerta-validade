@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.config import Configuracao, obter_configuracao
@@ -97,7 +98,15 @@ def criar_app(config: Configuracao | None = None, leitor: LeitorDeEmbalagem | No
 
     @app.get("/api/saude", tags=["sistema"])
     def saude():
-        return {"status": "ok", "ia": "ligada" if config.ia_configurada else "desligada"}
+        # Consulta o banco de verdade: serve para monitorar e mantém o Supabase grátis acordado.
+        try:
+            with app.state.engine.connect() as conexao:
+                conexao.execute(text("SELECT 1"))
+            banco = "ok"
+        except Exception:
+            log.exception("Banco fora do ar")
+            return JSONResponse({"status": "erro", "banco": "fora do ar"}, status_code=503)
+        return {"status": "ok", "banco": banco, "ia": "ligada" if config.ia_configurada else "desligada"}
 
     @app.api_route("/api/{caminho:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"], include_in_schema=False)
     def api_inexistente(caminho: str):

@@ -37,6 +37,10 @@ class Configuracao(BaseSettings):
     ia_confianca_minima: float = 0.75
     leitura_max_tentativas: int = 3
 
+    # true = a IA lê a foto durante a própria requisição, sem fila nem worker e sem gravar
+    # a foto em disco. É o modo de hospedagens que "dormem" entre acessos (ex.: Vercel).
+    leitura_imediata: bool = False
+
     # Fila
     worker_embutido: bool = True
     worker_intervalo_segundos: float = 2.0
@@ -53,6 +57,10 @@ class Configuracao(BaseSettings):
     def _validar(self) -> "Configuracao":
         if self.ambiente not in AMBIENTES:
             raise ValueError(f"AMBIENTE deve ser um de {sorted(AMBIENTES)}")
+        # Supabase e outros entregam "postgresql://" ou "postgres://"; o driver instalado é o psycopg 3.
+        for prefixo in ("postgresql://", "postgres://"):
+            if self.database_url.startswith(prefixo):
+                self.database_url = "postgresql+psycopg://" + self.database_url[len(prefixo) :]
         if self.producao:
             if len(self.secret_key) < 32:
                 raise ValueError("Em produção, SECRET_KEY é obrigatória e precisa ter 32+ caracteres")
