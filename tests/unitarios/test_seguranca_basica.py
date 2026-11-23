@@ -60,3 +60,18 @@ def test_endereco_do_supabase_usa_o_driver_instalado():
     for url in ("postgresql://u:s@h:6543/postgres", "postgres://u:s@h:6543/postgres"):
         config = Configuracao(_env_file=None, database_url=url)
         assert config.database_url == "postgresql+psycopg://u:s@h:6543/postgres"
+
+
+def test_dependencias_iguais_no_requirements_e_no_pyproject():
+    """O Vercel instala pelo pyproject.toml e o Docker pelo requirements.txt."""
+    import tomllib
+    from pathlib import Path
+
+    raiz = Path(__file__).resolve().parents[2]
+    requirements = {
+        linha.strip()
+        for linha in (raiz / "requirements.txt").read_text(encoding="utf-8").splitlines()
+        if linha.strip() and not linha.startswith("#")
+    }
+    pyproject = set(tomllib.loads((raiz / "pyproject.toml").read_text(encoding="utf-8"))["project"]["dependencies"])
+    assert requirements == pyproject

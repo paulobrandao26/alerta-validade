@@ -3,6 +3,22 @@ name = "validade-certa"
 version = "0.1.0"
 description = "Alerta de produtos perto de vencer para mercados pequenos, com leitura da data por foto (IA)."
 requires-python = ">=3.12"
+# Mesma lista do requirements.txt (o Vercel instala a partir daqui; o Docker, de lá).
+# O teste test_dependencias_iguais garante que as duas listas não se separem.
+dependencies = [
+    "fastapi==0.165.0",
+    "uvicorn[standard]==0.54.0",
+    "SQLAlchemy==2.1.9",
+    "alembic==1.20.1",
+    "pydantic==2.12.5",
+    "pydantic-settings==2.16.3",
+    "email-validator==2.4.0",
+    "argon2-cffi==25.1.0",
+    "PyJWT==2.15.1",
+    "python-multipart==0.0.34",
+    "httpx==0.28.1",
+    "psycopg[binary]==3.3.9",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/unitarios", "tests/integracao"]
