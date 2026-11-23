@@ -98,7 +98,7 @@ def criar_app(config: Configuracao | None = None, leitor: LeitorDeEmbalagem | No
 
     @app.get("/api/saude", tags=["sistema"])
     def saude():
-        # Consulta o banco de verdade: serve para monitorar e mantém o Supabase grátis acordado.
+        # Consulta o banco de verdade: serve para monitorar e mantém o banco acordado.
         try:
             with app.state.engine.connect() as conexao:
                 conexao.execute(text("SELECT 1"))

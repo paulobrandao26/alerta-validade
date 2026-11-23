@@ -68,14 +68,13 @@ cp .env.example .env
 docker compose up --build
 ```
 
-### No ar de graça (Vercel + Supabase)
+### No ar de graça (Vercel + Neon)
 
-A versão publicada roda no **Vercel**, que dorme entre os acessos e acorda quando alguém abre o site, com o banco no **Supabase** (PostgreSQL). Os dois são grátis.
+A versão publicada roda no **Vercel**, que dorme entre os acessos e acorda quando alguém abre o site, com o banco no **Neon** (PostgreSQL), que também dorme e acorda sozinho na primeira consulta. Os dois são grátis e não pedem cartão.
 
 - Como no Vercel nada fica ligado o tempo todo, não há worker: com `LEITURA_IMEDIATA=true` a IA lê a foto durante a própria requisição e a foto fica só na memória. Se a IA falhar, a pessoa digita a data. A fila com worker continua sendo o modo do Docker.
-- O Supabase grátis pausa o banco depois de uma semana sem uso. O workflow [manter-acordado.yml](.github/workflows/manter-acordado.yml) consulta `/api/saude` a cada 3 dias, e essa rota faz um `SELECT 1` no banco. Ele precisa da variável `URL_DO_SITE` no repositório.
-- Variáveis no Vercel: `AMBIENTE=producao`, `SECRET_KEY`, `DATABASE_URL` (endereço do pooler do Supabase, porta 6543), `LEITURA_IMEDIATA=true`, `WORKER_EMBUTIDO=false`, `MIGRAR_AO_INICIAR=false`, `IA_PROVEDORES=gemini,groq`, `GEMINI_API_KEY`, `GROQ_API_KEY`.
-- As tabelas são criadas uma vez, do computador: `DATABASE_URL=<endereço do Supabase> alembic upgrade head`.
+- Variáveis no Vercel: `AMBIENTE=producao`, `SECRET_KEY`, `DATABASE_URL` (endereço do Neon **com pooling**, que tem `-pooler` no nome), `LEITURA_IMEDIATA=true`, `WORKER_EMBUTIDO=false`, `MIGRAR_AO_INICIAR=false`, `IA_PROVEDORES=gemini,groq`, `GEMINI_API_KEY`, `GROQ_API_KEY`.
+- As tabelas são criadas uma vez, do computador: `DATABASE_URL=<endereço do Neon> alembic upgrade head`.
 - Limite conhecido: o bloqueio de tentativas de login fica na memória de cada instância, então no Vercel ele é mais fraco que no Docker.
 
 ## Testes

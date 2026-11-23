@@ -25,8 +25,9 @@ def criar_engine(url: str) -> Engine:
             cursor.close()
 
         return engine
-    if ":6543/" in url:
-        # Pooler do Supabase em modo transação (usado em hospedagem que "dorme", como o Vercel):
+    if ":6543/" in url or "-pooler." in url:
+        # Pooler em modo transação, do Supabase (porta 6543) ou do Neon (endereço com "-pooler"),
+        # usado em hospedagem que "dorme", como o Vercel:
         # o próprio pooler guarda as conexões, então aqui não se mantém nenhuma aberta,
         # e comandos preparados ficam desligados porque esse modo não os suporta.
         return create_engine(url, poolclass=NullPool, connect_args={"prepare_threshold": None})

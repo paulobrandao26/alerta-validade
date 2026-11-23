@@ -21,3 +21,6 @@ tests/avaliacao_ia/resultado*.csv
 Thumbs.db
 .vscode/
 .idea/
+
+.vercel
+.env*
